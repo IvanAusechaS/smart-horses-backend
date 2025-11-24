@@ -8,11 +8,11 @@ from typing import Dict, Tuple, Optional, List
 def manhattan_distance(pos1: Tuple[int, int], pos2: Tuple[int, int]) -> int:
     """
     Calculate Manhattan distance between two positions.
-    
+
     Args:
         pos1: First position (row, col)
         pos2: Second position (row, col)
-        
+
     Returns:
         Manhattan distance
     """
@@ -22,12 +22,12 @@ def manhattan_distance(pos1: Tuple[int, int], pos2: Tuple[int, int]) -> int:
 def is_center_position(position: Tuple[int, int]) -> bool:
     """
     Check if position is in the center of the board.
-    
+
     Center positions: (3,3), (3,4), (4,3), (4,4)
-    
+
     Args:
         position: Position to check (row, col)
-        
+
     Returns:
         True if in center, False otherwise
     """
@@ -36,35 +36,33 @@ def is_center_position(position: Tuple[int, int]) -> bool:
 
 
 def get_valuable_squares(
-    board: Dict[Tuple[int, int], Optional[str | int]]
+    board: Dict[Tuple[int, int], Optional[str | int]],
 ) -> List[Tuple[Tuple[int, int], int]]:
     """
     Get all valuable (positive points) non-destroyed squares.
-    
+
     Args:
         board: Game board dictionary
-        
+
     Returns:
         List of tuples: (position, value)
     """
     valuable = []
-    
+
     for position, value in board.items():
-        if value and value != 'destroyed' and isinstance(value, int) and value > 0:
+        if value and value != "destroyed" and isinstance(value, int) and value > 0:
             valuable.append((position, value))
-    
+
     return valuable
 
 
-def get_board_statistics(
-    board: Dict[Tuple[int, int], Optional[str | int]]
-) -> Dict:
+def get_board_statistics(board: Dict[Tuple[int, int], Optional[str | int]]) -> Dict:
     """
     Get statistics about the current board state.
-    
+
     Args:
         board: Game board dictionary
-        
+
     Returns:
         Dictionary with statistics
     """
@@ -74,9 +72,9 @@ def get_board_statistics(
     negative_points = 0
     total_positive_value = 0
     total_negative_value = 0
-    
+
     for value in board.values():
-        if value == 'destroyed':
+        if value == "destroyed":
             destroyed += 1
         elif value is None:
             empty += 1
@@ -87,13 +85,13 @@ def get_board_statistics(
             else:
                 negative_points += 1
                 total_negative_value += value
-    
+
     return {
-        'destroyed': destroyed,
-        'empty': empty,
-        'positive_points': positive_points,
-        'negative_points': negative_points,
-        'total_positive_value': total_positive_value,
-        'total_negative_value': total_negative_value,
-        'available_squares': 64 - destroyed
+        "destroyed": destroyed,
+        "empty": empty,
+        "positive_points": positive_points,
+        "negative_points": negative_points,
+        "total_positive_value": total_positive_value,
+        "total_negative_value": total_negative_value,
+        "available_squares": 64 - destroyed,
     }
