@@ -191,8 +191,12 @@ def evaluate_game_state(game_state) -> float:
 
     # 2. Mobility (number of valid moves)
     mobility_weight = 10
-    white_moves = count_valid_moves(game_state.white_knight, game_state.board)
-    black_moves = count_valid_moves(game_state.black_knight, game_state.board)
+    white_moves = count_valid_moves(
+        game_state.white_knight, game_state.board, game_state.black_knight
+    )
+    black_moves = count_valid_moves(
+        game_state.black_knight, game_state.board, game_state.white_knight
+    )
     mobility_diff = white_moves - black_moves
     evaluation += mobility_diff * mobility_weight
 

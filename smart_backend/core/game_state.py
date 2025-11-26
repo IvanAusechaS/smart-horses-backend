@@ -109,12 +109,15 @@ class GameState:
             knight: 'white' or 'black'
 
         Returns:
-            List of valid positions (not destroyed)
+            List of valid positions (not destroyed and not occupied by opponent)
         """
         from smart_backend.core.move_generator import get_valid_moves
 
         position = self.white_knight if knight == "white" else self.black_knight
-        return get_valid_moves(position, self.board)
+        opponent_position = (
+            self.black_knight if knight == "white" else self.white_knight
+        )
+        return get_valid_moves(position, self.board, opponent_position)
 
     def make_move(self, knight: str, new_position: Tuple[int, int]) -> Dict:
         """
