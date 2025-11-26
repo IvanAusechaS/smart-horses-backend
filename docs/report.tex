@@ -140,6 +140,15 @@ Donde:
     \item Si el caballo está en la casilla: $\text{valor}(v) \times 2$
 \end{itemize}
 
+\subsection{Prevención de Colisiones}
+
+La heurística incluye lógica para prevenir que ambos caballos ocupen la misma casilla:
+\begin{itemize}
+    \item Los movimientos legales excluyen la posición actual del oponente
+    \item El cálculo de movilidad considera esta restricción
+    \item Esto garantiza que solo un caballo puede ocupar cada casilla en todo momento
+\end{itemize}
+
 \subsection{Pesos Asignados}
 
 Los pesos fueron seleccionados para reflejar la importancia relativa de cada factor:
@@ -285,6 +294,33 @@ Experto & 6 & 2,000-5,000 & 50-200 & $\sim$70\% \\
 \caption{Rendimiento del Minimax por nivel de dificultad}
 \end{table}
 
+\section{Características Especiales}
+
+\subsection{Prevención de Colisiones de Caballos}
+
+Implementación actualizada (Noviembre 2025) que previene que ambos caballos ocupen la misma casilla:
+
+\textbf{Archivos modificados:}
+\begin{itemize}
+    \item \texttt{smart\_backend/core/move\_generator.py}: Funciones \texttt{get\_valid\_moves()} y \texttt{count\_valid\_moves()} ahora aceptan \texttt{opponent\_position} como parámetro
+    \item \texttt{smart\_backend/core/game\_state.py}: \texttt{get\_valid\_moves()} ahora pasa la posición del oponente
+    \item \texttt{smart\_backend/algorithms/heuristic.py}: Cálculos de movilidad actualizados para considerar posición del oponente
+\end{itemize}
+
+\textbf{Lógica implementada:}
+\begin{lstlisting}[language=Python, caption=Prevención de colisiones en move\_generator.py]
+def get_valid_moves(position, board, opponent_position=None):
+    valid_moves = []
+    for move in knight_moves:
+        new_pos = (position[0] + move[0], position[1] + move[1])
+        # Validar que no sea la posicion del oponente
+        if opponent_position and new_pos == opponent_position:
+            continue
+        # ... resto de validaciones
+\end{lstlisting}
+
+Esta mejora garantiza que el juego respeta la regla fundamental de que dos piezas no pueden ocupar el mismo espacio.
+
 \section{Limitaciones y Consideraciones}
 
 \subsection{Limitaciones}
@@ -348,6 +384,24 @@ def evaluate_game_state(game_state) -> float:
             return 10000
         elif game_state.winner == 'black':
             return -10000
+        else:
+            return 0
+    
+    evaluation = 0.0
+    
+    # 1. Score Difference (weight: 100)
+    score_diff = game_state.white_score - game_state.black_score
+    evaluation += score_diff * 100
+    
+    # 2. Mobility (weight: 10) - Updated to prevent collisions
+    white_moves = count_valid_moves(
+        game_state.white_knight, game_state.board, game_state.black_knight
+    )
+    black_moves = count_valid_moves(
+        game_state.black_knight, game_state.board, game_state.white_knight
+    )
+    mobility_diff = white_moves - black_moves
+    evaluation += mobility_diff * 10
         else:
             return 0
     

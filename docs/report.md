@@ -66,6 +66,13 @@ P_i = Σ (valor(v) / distancia(K_i, v)) para cada casilla valiosa v
 - Distancia de Manhattan entre caballo y casilla
 - Si está en la casilla: valor × 2
 
+### Prevención de Colisiones
+
+La heurística incluye lógica para prevenir que ambos caballos ocupen la misma casilla:
+- Los movimientos legales excluyen la posición actual del oponente
+- El cálculo de movilidad considera esta restricción
+- Esto garantiza que solo un caballo puede ocupar cada casilla en todo momento
+
 ---
 
 ## 3. Pesos Asignados
@@ -168,7 +175,33 @@ Solo almacena acumuladores numéricos.
 
 ---
 
-## 8. Limitaciones
+## 8. Características Especiales
+
+### Prevención de Colisiones de Caballos
+
+Implementación actualizada (Noviembre 2025) que previene que ambos caballos ocupen la misma casilla:
+
+**Archivos modificados:**
+- `smart_backend/core/move_generator.py`: Funciones `get_valid_moves()` y `count_valid_moves()` ahora aceptan `opponent_position` como parámetro
+- `smart_backend/core/game_state.py`: `get_valid_moves()` ahora pasa la posición del oponente
+- `smart_backend/algorithms/heuristic.py`: Cálculos de movilidad actualizados para considerar posición del oponente
+
+**Lógica implementada:**
+```python
+# En move_generator.py
+def get_valid_moves(position, board, opponent_position=None):
+    valid_moves = []
+    for move in knight_moves:
+        new_pos = (position[0] + move[0], position[1] + move[1])
+        # Validar que no sea la posición del oponente
+        if opponent_position and new_pos == opponent_position:
+            continue
+        # ... resto de validaciones
+```
+
+Esta mejora garantiza que el juego respeta la regla fundamental de que dos piezas no pueden ocupar el mismo espacio.
+
+## 9. Limitaciones
 
 1. **Horizonte de búsqueda:** Profundidad máxima 6 puede no capturar consecuencias a largo plazo
 2. **Heurística imperfecta:** No considera patrones tácticos específicos
@@ -177,7 +210,7 @@ Solo almacena acumuladores numéricos.
 
 ---
 
-## 9. Posibles Mejoras
+## 10. Posibles Mejoras
 
 - **Profundización iterativa:** Aumentar profundidad si el tiempo lo permite
 - **Ordenamiento de movimientos:** Evaluar movimientos prometedores primero
@@ -187,7 +220,7 @@ Solo almacena acumuladores numéricos.
 
 ---
 
-## 10. Conclusión
+## 11. Conclusión
 
 La función heurística implementada proporciona una evaluación robusta y eficiente de posiciones en Smart Horses. La jerarquía de pesos prioriza correctamente:
 
@@ -232,9 +265,13 @@ def evaluate_game_state(game_state) -> float:
     score_diff = game_state.white_score - game_state.black_score
     evaluation += score_diff * 100
     
-    # 2. Mobility (weight: 10)
-    white_moves = count_valid_moves(game_state.white_knight, game_state.board)
-    black_moves = count_valid_moves(game_state.black_knight, game_state.board)
+    # 2. Mobility (weight: 10) - Updated to prevent knight collisions
+    white_moves = count_valid_moves(
+        game_state.white_knight, game_state.board, game_state.black_knight
+    )
+    black_moves = count_valid_moves(
+        game_state.black_knight, game_state.board, game_state.white_knight
+    )
     mobility_diff = white_moves - black_moves
     evaluation += mobility_diff * 10
     
