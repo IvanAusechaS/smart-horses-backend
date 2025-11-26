@@ -46,6 +46,8 @@ class ProductionConfig(Config):
     """Production configuration."""
 
     DEBUG = False
+    # Allow all origins in production for mobile compatibility
+    CORS_ORIGINS = "*"
 
 
 # Configuration dictionary

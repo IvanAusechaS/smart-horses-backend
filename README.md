@@ -108,6 +108,7 @@ H(s) = 100·ΔScore + 10·ΔMobility + 5·ΔProximity + 3·ΔCenter - 400·Trapp
 ## 🔄 Actualizaciones Recientes (Noviembre 2025)
 
 ### Prevención de Colisiones de Caballos
+
 - Implementado sistema para evitar que ambos caballos ocupen la misma casilla
 - Archivos actualizados:
   - `move_generator.py`: Acepta parámetro `opponent_position`

@@ -8,9 +8,11 @@
 ## 1. Introducción del Proyecto
 
 ### Objetivo
+
 Implementar un juego estratégico de dos jugadores (Smart Horses) donde una IA basada en Minimax con poda Alpha-Beta compite contra un jugador humano.
 
 ### Descripción del Juego
+
 - Juego de suma cero en tablero 8×8
 - Dos caballos (knight de ajedrez) compiten por puntos
 - Casillas visitadas se destruyen permanentemente
@@ -21,6 +23,7 @@ Implementar un juego estratégico de dos jugadores (Smart Horses) donde una IA b
 ## 2. Reglas del Juego
 
 ### Elementos del Tablero
+
 - **64 casillas** en total (8×8)
 - **Exactamente 10 casillas con puntos:**
   - Valores: -10, -5, -4, -3, -1, +1, +3, +4, +5, +10
@@ -31,6 +34,7 @@ Implementar un juego estratégico de dos jugadores (Smart Horses) donde una IA b
 - **Resto:** Casillas vacías (0 puntos)
 
 ### Mecánica de Juego
+
 - **Movimiento:** Patrón L del caballo (8 direcciones posibles)
 - **Turnos:** Alternados, la máquina siempre inicia
 - **Destrucción:** Cada casilla visitada se marca como destruida
@@ -43,6 +47,7 @@ Implementar un juego estratégico de dos jugadores (Smart Horses) donde una IA b
 ## 3. Tecnologías Utilizadas
 
 ### Backend (Python)
+
 - **Framework:** Flask 3.0.0
 - **CORS:** Flask-CORS 4.0.0
 - **Configuración:** python-dotenv 1.0.0
@@ -58,6 +63,7 @@ Implementar un juego estratégico de dos jugadores (Smart Horses) donde una IA b
   ```
 
 ### Frontend (React + Vite)
+
 - **Framework:** React 18.2.0
 - **Build Tool:** Vite 5.2.0
 - **Estilos:** CSS puro
@@ -69,6 +75,7 @@ Implementar un juego estratégico de dos jugadores (Smart Horses) donde una IA b
   - GameControls: Controles de juego
 
 ### Despliegue
+
 - **Backend:** Compatible con Render/Heroku
 - **Frontend:** Vercel/Netlify
 - **Repositories:**
@@ -80,11 +87,13 @@ Implementar un juego estratégico de dos jugadores (Smart Horses) donde una IA b
 ## 4. Algoritmo Minimax
 
 ### Concepto
+
 - **Tipo:** Búsqueda adversarial para juegos de suma cero
 - **Objetivo:** Encontrar el mejor movimiento asumiendo juego óptimo del oponente
 - **Implementación:** Recursiva con alternancia MAX/MIN
 
 ### Poda Alpha-Beta
+
 - **Optimización** que elimina ramas innecesarias del árbol
 - **Variables:**
   - α (alpha): Mejor valor garantizado para MAX
@@ -94,17 +103,18 @@ Implementar un juego estratégico de dos jugadores (Smart Horses) donde una IA b
 
 ### Niveles de Dificultad
 
-| Nivel | Profundidad | Nodos | Tiempo | Descripción |
-|-------|-------------|-------|--------|-------------|
-| Principiante | 2 | 20-50 | <10ms | Mira 2 movimientos adelante |
-| Amateur | 4 | 200-500 | 10-50ms | Mira 4 movimientos adelante |
-| Experto | 6 | 2,000-5,000 | 50-200ms | Mira 6 movimientos adelante |
+| Nivel        | Profundidad | Nodos       | Tiempo   | Descripción                 |
+| ------------ | ----------- | ----------- | -------- | --------------------------- |
+| Principiante | 2           | 20-50       | <10ms    | Mira 2 movimientos adelante |
+| Amateur      | 4           | 200-500     | 10-50ms  | Mira 4 movimientos adelante |
+| Experto      | 6           | 2,000-5,000 | 50-200ms | Mira 6 movimientos adelante |
 
 ---
 
 ## 5. Función Heurística (Detalle Principal)
 
 ### Fórmula Completa
+
 ```
 H(s) = w₁·ΔScore + w₂·ΔMobility + w₃·ΔProximity + w₄·ΔCenter + w₅·NTrapped
 ```
@@ -112,36 +122,43 @@ H(s) = w₁·ΔScore + w₂·ΔMobility + w₃·ΔProximity + w₄·ΔCenter + w
 ### Componentes y Pesos
 
 #### 1. Diferencia de Puntos (w₁ = 100)
+
 - **Cálculo:** (puntos_blanco - puntos_negro) × 100
 - **Justificación:** Factor más importante - determina la victoria
 - **Ejemplo:** Si blanco tiene 15 y negro 8 → 700 puntos
 
 #### 2. Movilidad (w₂ = 10)
+
 - **Cálculo:** (movimientos_blanco - movimientos_negro) × 10
 - **Justificación:** Flexibilidad estratégica, evita trampas
 - **Ejemplo:** 6 vs 4 movimientos → 20 puntos
 
 #### 3. Proximidad a Casillas Valiosas (w₃ = 5)
+
 - **Cálculo:** Σ(valor_casilla / distancia_Manhattan)
 - **Justificación:** Posicionamiento para capturas futuras
 - **Ejemplo:** Estar a distancia 3 de casilla +10 → +16.67 puntos
 
 #### 4. Control del Centro (w₄ = 3)
+
 - **Posiciones centro:** (3,3), (3,4), (4,3), (4,4)
 - **Justificación:** Hasta 8 movimientos posibles vs 2-4 en bordes
 - **Ejemplo:** Blanco en centro → +3 puntos
 
 #### 5. Penalización por Trampa (w₅ = -400)
+
 - **Cálculo:** -400 si sin movimientos, +400 si oponente sin movimientos
 - **Justificación:** Evitar -4 puntos de penalización del juego
 - **Ejemplo:** Quedar atrapado → -400 puntos
 
 ### Estados Terminales
+
 - **Victoria blanco:** +10,000
 - **Victoria negro:** -10,000
 - **Empate:** 0
 
 ### Ejemplo Práctico
+
 ```
 Posición:
   Blanco: 15 puntos, 6 movimientos, proximidad 10, en centro
@@ -156,6 +173,7 @@ Interpretación: Ventaja fuerte para blanco
 ```
 
 ### Complejidad
+
 - **Tiempo:** O(n + m) = O(1) en práctica (n≤10, m≤8)
 - **Espacio:** O(1)
 
@@ -166,35 +184,42 @@ Interpretación: Ventaja fuerte para blanco
 ### ✅ Pruebas Automatizadas (28 tests, 100% exitosos)
 
 #### Generación de Casillas
+
 - Exactamente 10 casillas con puntos
 - Valores correctos: -10, -5, -4, -3, -1, +1, +3, +4, +5, +10
 - Sin duplicación de valores
 
 #### Posiciones Únicas
+
 - Caballos en posiciones diferentes
 - Caballos no inician en casillas con puntos
 - Todas las posiciones especiales son únicas
 
 #### Movimientos del Caballo
+
 - Patrón L correcto (8 direcciones)
 - Movimientos dentro del tablero
 - Esquinas solo 2 movimientos
 
 #### Destrucción de Casillas
+
 - Casillas se marcan como destruidas
 - No se pueden reutilizar
 - Filtrado correcto en movimientos válidos
 
 #### Penalizaciones
+
 - -4 puntos aplicados correctamente
 - Sin penalización cuando ambos atrapados
 
 #### Configuración de Profundidad
+
 - Principiante: profundidad 2
 - Amateur: profundidad 4
 - Experto: profundidad 6
 
 #### Documentación
+
 - Módulos con docstrings completos
 - Funciones documentadas con ejemplos
 - Fórmulas y complejidad especificadas
@@ -206,6 +231,7 @@ Interpretación: Ventaja fuerte para blanco
 ### Comandos para Ejecutar Localmente
 
 #### Backend:
+
 ```bash
 cd smart-horses-backend
 python -m venv .venv
@@ -217,6 +243,7 @@ python run.py
 ```
 
 #### Frontend:
+
 ```bash
 cd smart-horses-frontend
 npm install
@@ -225,6 +252,7 @@ npm run dev
 ```
 
 #### Tests:
+
 ```bash
 cd smart-horses-backend
 pytest tests/test_game_validations.py -v
@@ -232,6 +260,7 @@ pytest tests/test_game_validations.py -v
 ```
 
 ### Flujo de Demostración
+
 1. Iniciar backend y frontend
 2. Seleccionar nivel de dificultad
 3. Observar primer movimiento de la IA
@@ -247,27 +276,32 @@ pytest tests/test_game_validations.py -v
 ### API REST Endpoints
 
 #### `POST /api/game/new`
+
 - Crea nuevo juego con dificultad seleccionada
 - Retorna estado inicial con primer movimiento de IA
 
 #### `POST /api/game/move`
+
 - Procesa movimiento del jugador
 - Calcula respuesta de IA con Minimax
 - Retorna estado actualizado
 
 #### `POST /api/game/valid-moves`
+
 - Obtiene movimientos legales para un caballo
 - Usado para mostrar casillas disponibles
 
 #### `POST /api/game/machine-move`
+
 - Obtiene siguiente movimiento de IA sin aplicarlo
 - Útil para hints o análisis
 
 ### Flujo de Datos
+
 ```
-Usuario hace clic → Frontend valida → 
-API recibe movimiento → Backend aplica → 
-Minimax calcula respuesta → API retorna estado → 
+Usuario hace clic → Frontend valida →
+API recibe movimiento → Backend aplica →
+Minimax calcula respuesta → API retorna estado →
 Frontend actualiza UI con delay visual
 ```
 
@@ -276,6 +310,7 @@ Frontend actualiza UI con delay visual
 ## 9. Resultados y Logros
 
 ### Métricas de Calidad
+
 - ✅ **28 tests automatizados** pasando (100%)
 - ✅ **Documentación exhaustiva** (>300 líneas por módulo)
 - ✅ **Rendimiento óptimo** (<200ms respuesta en experto)
@@ -283,6 +318,7 @@ Frontend actualiza UI con delay visual
 - ✅ **Validaciones completas** según requerimientos
 
 ### Funcionalidades Destacadas
+
 - Visualización clara de movimientos (delay configurable)
 - Tres niveles de dificultad bien balanceados
 - Interfaz intuitiva y responsiva
@@ -290,6 +326,7 @@ Frontend actualiza UI con delay visual
 - Explicación detallada de decisiones de IA
 
 ### Documentación Entregada
+
 - `report.tex` - Informe LaTeX profesional
 - `report.md` - Versión Markdown
 - `index.md` - Guía de sustentación (este archivo)
@@ -301,15 +338,17 @@ Frontend actualiza UI con delay visual
 ## 10. Conclusiones
 
 ### Objetivos Cumplidos
+
 ✅ Juego completamente funcional según especificaciones  
 ✅ IA competente con Minimax + Alpha-Beta  
 ✅ Heurística bien diseñada y justificada  
 ✅ Validaciones exhaustivas (28 tests)  
 ✅ Documentación profesional completa  
 ✅ Código limpio y mantenible  
-✅ Rendimiento en tiempo real  
+✅ Rendimiento en tiempo real
 
 ### Aprendizajes Clave
+
 - Diseño e implementación de funciones heurísticas
 - Optimización con poda Alpha-Beta
 - Balance entre complejidad y eficiencia
@@ -317,6 +356,7 @@ Frontend actualiza UI con delay visual
 - Documentación como parte integral del desarrollo
 
 ### Trabajo Futuro
+
 - Tablas de transposición para cachear posiciones
 - Ordenamiento de movimientos para mejor poda
 - Pesos adaptativos según fase del juego
@@ -328,18 +368,23 @@ Frontend actualiza UI con delay visual
 ## 11. Preguntas Frecuentes
 
 ### ¿Por qué exactamente 10 casillas con puntos?
+
 Para mantener el juego balanceado y con duración razonable (~15-25 turnos).
 
 ### ¿Por qué estos valores específicos?
+
 Rango simétrico (-10 a +10) que permite estrategia: perseguir positivos, evitar negativos.
 
 ### ¿Por qué profundidad máxima 6?
+
 Balance entre fuerza de juego y tiempo de respuesta (<200ms).
 
 ### ¿Cómo se eligieron los pesos?
+
 Análisis iterativo: puntos > movilidad > proximidad > centro, con testing empírico.
 
 ### ¿La IA siempre juega perfectamente?
+
 Dentro de su profundidad de búsqueda, sí. Más allá puede ser sub-óptima (horizonte limitado).
 
 ---
@@ -347,16 +392,19 @@ Dentro de su profundidad de búsqueda, sí. Más allá puede ser sub-óptima (ho
 ## 12. Contacto y Enlaces
 
 ### Repositorios
+
 - **Backend:** https://github.com/IvanAusechaS/smart-horses-backend
 - **Frontend:** https://github.com/IvanAusechaS/smart-horses-frontend
 
 ### Equipo
+
 - **Andrey Quiceno**
 - **Ivan Ausecha**
 - **Jonathan Aristizabal**
 - **Jose Martínez**
 
 ### Institución
+
 **Universidad del Valle**  
 Facultad de Ingeniería  
 Asignatura: Inteligencia Artificial  
@@ -366,4 +414,4 @@ Año: 2025
 
 **¡Gracias por su atención!**
 
-*Este proyecto demuestra la aplicación práctica de algoritmos de búsqueda adversarial y diseño de heurísticas en un entorno interactivo y educativo.*
+_Este proyecto demuestra la aplicación práctica de algoritmos de búsqueda adversarial y diseño de heurísticas en un entorno interactivo y educativo._

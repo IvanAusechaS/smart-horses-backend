@@ -1,6 +1,7 @@
 # Smart Horses - Deployment Guide
 
 ## Overview
+
 This guide covers deploying the Smart Horses application with the minimax AI implementation to production environments.
 
 ## Architecture
@@ -17,6 +18,7 @@ This guide covers deploying the Smart Horses application with the minimax AI imp
 ## Backend Deployment
 
 ### Requirements
+
 - Python 3.11+
 - Gunicorn WSGI server
 - 512MB RAM minimum (1GB recommended for expert mode)
@@ -27,6 +29,7 @@ This guide covers deploying the Smart Horses application with the minimax AI imp
 #### 1. Render.com (Recommended)
 
 **Configuration (`render.yaml`):**
+
 ```yaml
 services:
   - type: web
@@ -47,6 +50,7 @@ services:
 ```
 
 **Deployment Steps:**
+
 1. Push code to GitHub
 2. Connect repository to Render
 3. Render will auto-detect `render.yaml`
@@ -54,6 +58,7 @@ services:
 5. Deploy!
 
 **Important Settings:**
+
 - **Workers**: 2 (handles concurrent games)
 - **Timeout**: 120s (allows expert mode searches)
 - **Region**: Choose closest to your users
@@ -61,11 +66,13 @@ services:
 #### 2. Heroku
 
 **Procfile:**
+
 ```
 web: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
 ```
 
 **Deployment Steps:**
+
 ```bash
 # Login to Heroku
 heroku login
@@ -87,6 +94,7 @@ heroku logs --tail
 #### 3. Railway
 
 **Configuration:**
+
 - Build Command: `pip install -r requirements.txt`
 - Start Command: `gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120`
 - Environment Variables:
@@ -95,17 +103,18 @@ heroku logs --tail
 
 ### Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `FLASK_ENV` | Environment mode | `production` |
-| `FLASK_DEBUG` | Debug mode (disable in production) | `False` |
-| `PORT` | Server port (usually auto-set) | `5000` |
-| `CORS_ORIGINS` | Allowed frontend domains | `https://app.com,https://www.app.com` |
-| `SECRET_KEY` | Flask secret key | `random-secure-string` |
+| Variable       | Description                        | Example                               |
+| -------------- | ---------------------------------- | ------------------------------------- |
+| `FLASK_ENV`    | Environment mode                   | `production`                          |
+| `FLASK_DEBUG`  | Debug mode (disable in production) | `False`                               |
+| `PORT`         | Server port (usually auto-set)     | `5000`                                |
+| `CORS_ORIGINS` | Allowed frontend domains           | `https://app.com,https://www.app.com` |
+| `SECRET_KEY`   | Flask secret key                   | `random-secure-string`                |
 
 ### Performance Tuning
 
 #### Worker Configuration
+
 ```bash
 # Lightweight (512MB RAM)
 --workers 1 --timeout 120
@@ -118,6 +127,7 @@ heroku logs --tail
 ```
 
 #### Timeout Considerations
+
 - **Beginner mode**: < 10ms (1s timeout sufficient)
 - **Amateur mode**: < 50ms (5s timeout sufficient)
 - **Expert mode**: < 200ms typically, up to 2s worst case
@@ -126,6 +136,7 @@ heroku logs --tail
 ### Health Checks
 
 Configure health check endpoint:
+
 - **URL**: `/health`
 - **Method**: GET
 - **Expected Response**: `200 OK`
@@ -138,6 +149,7 @@ Configure health check endpoint:
 #### 1. Vercel (Recommended)
 
 **`vercel.json`:**
+
 ```json
 {
   "buildCommand": "npm run build",
@@ -152,11 +164,13 @@ Configure health check endpoint:
 ```
 
 **Deployment Steps:**
+
 1. Install Vercel CLI: `npm i -g vercel`
 2. Login: `vercel login`
 3. Deploy: `vercel --prod`
 
 **Environment Variables in Vercel:**
+
 ```
 VITE_API_URL=https://your-backend.onrender.com
 ```
@@ -164,6 +178,7 @@ VITE_API_URL=https://your-backend.onrender.com
 #### 2. Netlify
 
 **`netlify.toml`:**
+
 ```toml
 [build]
   command = "npm run build"
@@ -176,6 +191,7 @@ VITE_API_URL=https://your-backend.onrender.com
 ```
 
 **Deployment:**
+
 ```bash
 # Install Netlify CLI
 npm install -g netlify-cli
@@ -187,6 +203,7 @@ netlify deploy --prod
 #### 3. GitHub Pages + Render
 
 For a completely free option:
+
 1. Deploy backend to Render (free tier)
 2. Deploy frontend to GitHub Pages
 3. Configure CNAME and custom domain if needed
@@ -202,7 +219,7 @@ Update `smart_backend/config.py`:
 class ProductionConfig(Config):
     """Production configuration."""
     DEBUG = False
-    
+
     # Set allowed origins
     CORS_ORIGINS = [
         'https://smart-horses.vercel.app',
@@ -213,6 +230,7 @@ class ProductionConfig(Config):
 ### Frontend API URL
 
 Create `.env.production`:
+
 ```env
 VITE_API_URL=https://smart-horses-backend.onrender.com
 ```
@@ -226,6 +244,7 @@ curl https://your-backend.onrender.com/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "healthy",
@@ -245,11 +264,12 @@ curl -X POST https://your-backend.onrender.com/api/game/new \
 ### 3. Frontend Connection Test
 
 Open browser console on your deployed frontend:
+
 ```javascript
 // Should show successful connection
-fetch('https://your-backend.onrender.com/health')
-  .then(r => r.json())
-  .then(console.log)
+fetch("https://your-backend.onrender.com/health")
+  .then((r) => r.json())
+  .then(console.log);
 ```
 
 ## Monitoring
@@ -257,15 +277,18 @@ fetch('https://your-backend.onrender.com/health')
 ### Backend Metrics to Monitor
 
 1. **Response Time**
+
    - Beginner: < 100ms
    - Amateur: < 200ms
    - Expert: < 500ms
 
 2. **Error Rate**
+
    - Target: < 1%
    - Alert if: > 5%
 
 3. **Memory Usage**
+
    - Normal: 100-300MB
    - Alert if: > 400MB
 
@@ -276,12 +299,14 @@ fetch('https://your-backend.onrender.com/health')
 ### Logging
 
 Backend logs important metrics:
+
 ```
 127.0.0.1 - - [timestamp] "POST /api/game/move HTTP/1.1" 200
 Minimax: depth=4, nodes=287, time=42ms, eval=423.5
 ```
 
 Access logs:
+
 ```bash
 # Render
 Check dashboard logs
@@ -307,6 +332,7 @@ railway logs
 ### Recommended Additions
 
 1. **Rate Limiting** (prevent abuse):
+
 ```python
 from flask_limiter import Limiter
 
@@ -319,10 +345,10 @@ def new_game():
 ```
 
 2. **Request Validation**:
-Already implemented in routes with input validation
+   Already implemented in routes with input validation
 
 3. **Error Handling**:
-Custom error handlers already in place
+   Custom error handlers already in place
 
 ## Troubleshooting
 
@@ -331,23 +357,27 @@ Custom error handlers already in place
 #### 1. CORS Errors
 
 **Symptoms:**
+
 ```
-Access to fetch at 'https://backend.com/api/game/new' 
+Access to fetch at 'https://backend.com/api/game/new'
 from origin 'https://frontend.com' has been blocked by CORS policy
 ```
 
 **Solution:**
+
 - Add frontend domain to `CORS_ORIGINS` environment variable
 - Ensure exact match including protocol and subdomain
 
 #### 2. Timeout Errors (Expert Mode)
 
 **Symptoms:**
+
 ```
 504 Gateway Timeout
 ```
 
 **Solution:**
+
 - Increase Gunicorn timeout to 120s
 - Check if platform has separate timeout setting
 - Consider reducing max_depth for expert mode in production
@@ -355,10 +385,12 @@ from origin 'https://frontend.com' has been blocked by CORS policy
 #### 3. Cold Start Delays
 
 **Symptoms:**
+
 - First request takes 10-30 seconds
 - Subsequent requests are fast
 
 **Solution:**
+
 - Use a service with always-on workers (paid tier)
 - Implement a keep-alive ping every 10 minutes
 - Add loading states in frontend
@@ -366,11 +398,13 @@ from origin 'https://frontend.com' has been blocked by CORS policy
 #### 4. Memory Issues
 
 **Symptoms:**
+
 ```
 Memory limit exceeded
 ```
 
 **Solution:**
+
 - Upgrade to plan with more RAM
 - Reduce concurrent workers
 - Add garbage collection after each game
@@ -391,6 +425,7 @@ class ProductionConfig(Config):
 ### Backend Optimizations
 
 1. **Caching** (future enhancement):
+
 ```python
 from functools import lru_cache
 
@@ -401,10 +436,10 @@ def evaluate_position(board_hash):
 ```
 
 2. **Connection Pooling**:
-Already efficient (no database connections)
+   Already efficient (no database connections)
 
 3. **Worker Configuration**:
-Tune based on actual usage patterns
+   Tune based on actual usage patterns
 
 ### Frontend Optimizations
 
@@ -416,6 +451,7 @@ Tune based on actual usage patterns
 ## Scaling Considerations
 
 ### Current Limitations
+
 - Free tier services may limit:
   - Concurrent connections: ~100
   - Request duration: 120s
@@ -425,6 +461,7 @@ Tune based on actual usage patterns
 ### When to Scale Up
 
 Scale when you notice:
+
 - Response times > 1s for amateur mode
 - Frequent timeouts
 - Memory warnings
@@ -433,6 +470,7 @@ Scale when you notice:
 ### Scaling Options
 
 1. **Vertical Scaling** (upgrade plan):
+
    - More RAM for concurrent games
    - Dedicated CPU for faster searches
    - No cold starts
@@ -445,11 +483,13 @@ Scale when you notice:
 ## Costs
 
 ### Free Tier Capabilities
+
 - **Render/Railway**: 750 hours/month free
 - **Heroku**: 1000 hours/month (with credit card)
 - **Vercel/Netlify**: Unlimited for hobby projects
 
 ### Estimated Costs (if scaling)
+
 - Backend (1GB RAM, always-on): $7-15/month
 - Frontend: Free (static hosting)
 - Custom domain: $10-15/year
@@ -460,16 +500,19 @@ Scale when you notice:
 ### Regular Tasks
 
 **Weekly:**
+
 - Check error logs
 - Monitor response times
 - Review usage patterns
 
 **Monthly:**
+
 - Update dependencies
 - Review security advisories
 - Check for service updates
 
 **Quarterly:**
+
 - Performance optimization review
 - User feedback implementation
 - Algorithm improvements
@@ -489,16 +532,19 @@ Scale when you notice:
 If deployment fails:
 
 **Render:**
+
 ```bash
 # Use dashboard to rollback to previous deployment
 ```
 
 **Heroku:**
+
 ```bash
 heroku rollback
 ```
 
 **Vercel:**
+
 ```bash
 vercel rollback
 ```
@@ -506,16 +552,19 @@ vercel rollback
 ## Support & Resources
 
 ### Documentation
+
 - Flask: https://flask.palletsprojects.com/
 - React: https://react.dev/
 - Vite: https://vitejs.dev/
 
 ### Deployment Platforms
+
 - Render: https://render.com/docs
 - Heroku: https://devcenter.heroku.com/
 - Vercel: https://vercel.com/docs
 
 ### Monitoring Tools (Optional)
+
 - Sentry (error tracking)
 - LogRocket (session replay)
 - New Relic (APM)

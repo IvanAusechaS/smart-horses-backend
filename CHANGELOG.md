@@ -5,6 +5,7 @@
 ### 🐛 Bug Fixes
 
 #### Backend
+
 - **Board Initialization:** Fixed `_initialize_board()` to generate exactly 10 point squares with unique values
   - Previous: 40 squares (4 of each value: -10, -5, -4, -3, -1, +1, +3, +4, +5, +10)
   - Current: 10 squares (one of each value, no duplicates)
@@ -12,6 +13,7 @@
   - File: `smart_backend/core/game_state.py`
 
 #### Frontend
+
 - **Move Visualization:** Added delay between player and AI moves
   - Added 800ms delay before API call in `makePlayerMove()`
   - Player sees their move first, then AI response appears
@@ -21,7 +23,9 @@
 ### 📚 Documentation
 
 #### Technical Reports
+
 - **LaTeX Report:** Created comprehensive academic report (`docs/report.tex`)
+
   - Heuristic function explanation with mathematical formulas
   - Weight justification and examples
   - Complexity analysis O(n+m)
@@ -29,6 +33,7 @@
   - Ready for compilation to PDF
 
 - **Markdown Report:** Created Markdown version (`docs/report.md`)
+
   - Same content as LaTeX report
   - Tables, code blocks, mathematical notation
   - Suitable for GitHub display
@@ -40,7 +45,9 @@
   - FAQs and contact information
 
 #### Code Documentation
+
 - **Heuristic Module:** Enhanced `smart_backend/algorithms/heuristic.py`
+
   - Added 50+ line module docstring with complete formula
   - Mathematical notation: H(s) = w₁·ΔScore + w₂·ΔMobility + w₃·ΔProximity + w₄·ΔCenter + w₅·NoMoves
   - Weight explanations and justifications
@@ -57,6 +64,7 @@
 ### ✅ Testing
 
 #### Test Suite
+
 - **Created:** `tests/test_game_validations.py`
   - 28 automated tests, 100% passing
   - Test classes:
@@ -72,6 +80,7 @@
   - Execution time: ~0.5s
 
 #### Validation Coverage
+
 - ✅ Exactly 10 point squares
 - ✅ Correct values: -10, -5, -4, -3, -1, +1, +3, +4, +5, +10
 - ✅ No duplicate values
@@ -87,6 +96,7 @@
 ### 🎨 Code Quality
 
 #### Formatting
+
 - Applied `black` formatter to entire codebase
 - 14 files reformatted:
   - `smart_backend/` modules
@@ -111,20 +121,22 @@ DEPLOYMENT.md       # Deployment instructions (previous)
 
 ### 📊 Metrics
 
-| Metric | Value |
-|--------|-------|
-| Test Coverage | 28 tests |
-| Test Success Rate | 100% |
-| Files Modified (Backend) | 20 |
-| Files Modified (Frontend) | 1 |
-| Lines of Documentation | ~3,000 |
-| Code Formatted | 14 files |
-| Execution Time (Tests) | 0.53s |
+| Metric                    | Value    |
+| ------------------------- | -------- |
+| Test Coverage             | 28 tests |
+| Test Success Rate         | 100%     |
+| Files Modified (Backend)  | 20       |
+| Files Modified (Frontend) | 1        |
+| Lines of Documentation    | ~3,000   |
+| Code Formatted            | 14 files |
+| Execution Time (Tests)    | 0.53s    |
 
 ### 🚀 Deployment
 
 #### Branches Pushed
+
 - Backend: `fix/validations-and-docs`
+
   - Commit: `92a4d77` - "fix: limit point squares to 10 with unique values and positions"
   - Changes: 20 files, +3192/-569 lines
   - Remote: https://github.com/IvanAusechaS/smart-horses-backend
@@ -135,13 +147,16 @@ DEPLOYMENT.md       # Deployment instructions (previous)
   - Remote: https://github.com/IvanAusechaS/smart-horses-frontend
 
 #### Pull Requests
+
 Create PRs with the following checklist:
 
 ```markdown
 ## Description
+
 This PR includes comprehensive validations, bug fixes, and documentation for the Smart Horses AI project.
 
 ## Changes
+
 - [x] Fixed board initialization (10 unique squares)
 - [x] Fixed move visualization timing
 - [x] Enhanced code documentation
@@ -150,11 +165,13 @@ This PR includes comprehensive validations, bug fixes, and documentation for the
 - [x] Formatted code with black
 
 ## Testing
+
 - [x] All 28 tests passing (100%)
 - [x] Manual testing completed
 - [x] Code formatted with black
 
 ## Documentation
+
 - [x] LaTeX report (report.tex)
 - [x] Markdown report (report.md)
 - [x] Presentation guide (index.md)
@@ -164,6 +181,7 @@ This PR includes comprehensive validations, bug fixes, and documentation for the
 ### 🎯 Requirements Fulfilled
 
 #### From Spanish Prompt
+
 1. ✅ **10 casillas con puntos:** Máximo 10 (única vez cada valor)
 2. ✅ **Valores únicos:** -10, -5, -4, -3, -1, +1, +3, +4, +5, +10
 3. ✅ **Posiciones únicas:** Caballos y casillas no se solapan

@@ -1,6 +1,7 @@
 # Minimax Algorithm Implementation Documentation
 
 ## Overview
+
 This document details the complete implementation of the Minimax algorithm with Alpha-Beta pruning for the Smart Horses game. The algorithm enables the AI to make intelligent decisions by evaluating possible future game states.
 
 ## Architecture
@@ -12,6 +13,7 @@ This document details the complete implementation of the Minimax algorithm with 
 The core AI decision-making engine that searches the game tree to find optimal moves.
 
 **Key Features:**
+
 - **Alpha-Beta Pruning**: Optimizes search by eliminating branches that won't affect the final decision
 - **Depth-Limited Search**: Configurable search depth based on difficulty level
 - **Node Evaluation**: Tracks number of nodes evaluated for performance monitoring
@@ -30,6 +32,7 @@ def minimax_alpha_beta(
 ```
 
 **Parameters:**
+
 - `game_state`: Current game state object
 - `depth`: Remaining search depth (0 = leaf node)
 - `alpha`: Best value for MAX player (white/machine)
@@ -38,16 +41,19 @@ def minimax_alpha_beta(
 - `nodes_evaluated`: Counter for performance tracking
 
 **Returns:**
+
 - Tuple of (evaluation_score, best_move, nodes_evaluated)
 
 **Algorithm Flow:**
 
 1. **Base Cases:**
+
    - Depth reaches 0: Evaluate current position
    - Game is over: Return terminal state evaluation
    - No valid moves: Return evaluation for stalemate
 
 2. **Maximizing Player (White/Machine):**
+
    - Initialize `max_eval` to negative infinity
    - For each valid move:
      - Simulate the move on a copy of the game state
@@ -66,6 +72,7 @@ def minimax_alpha_beta(
      - Prune if `beta <= alpha` (alpha cutoff)
 
 **Alpha-Beta Pruning Explained:**
+
 - **Alpha**: The best value the maximizer can guarantee
 - **Beta**: The best value the minimizer can guarantee
 - **Cutoff**: When beta <= alpha, remaining moves won't affect the result
@@ -78,6 +85,7 @@ Evaluates board positions to guide the minimax algorithm.
 **Evaluation Function: `evaluate_game_state()`**
 
 Returns a score where:
+
 - **Positive values**: Favor white (machine)
 - **Negative values**: Favor black (player)
 - **Zero**: Equal position
@@ -85,27 +93,32 @@ Returns a score where:
 **Evaluation Factors (in order of importance):**
 
 1. **Terminal States** (Weight: ±10,000)
+
    - Victory: +10,000
    - Defeat: -10,000
    - Tie: 0
 
 2. **Score Difference** (Weight: 100)
+
    - Most important factor in non-terminal states
    - Directly reflects point advantage
    - `evaluation += (white_score - black_score) × 100`
 
 3. **Mobility** (Weight: 10)
+
    - Number of available legal moves
    - More moves = more flexibility
    - `evaluation += (white_moves - black_moves) × 10`
 
 4. **Proximity to Valuable Squares** (Weight: 5)
+
    - Measures distance to high-value squares
    - Closer is better (inverse distance)
    - `proximity = Σ(square_value / distance)`
    - Being on a valuable square: `value × 2`
 
 5. **Center Control** (Weight: 3)
+
    - Bonus for occupying center positions (3,3), (3,4), (4,3), (4,4)
    - Central positions offer more mobility and control
    - `+3` for white in center, `-3` for black in center
@@ -117,6 +130,7 @@ Returns a score where:
    - `+400` if opponent has no moves
 
 **Example Evaluation:**
+
 ```
 White Score: 15, Black Score: 8
 White Moves: 6, Black Moves: 4
@@ -139,6 +153,7 @@ Represents the complete state of the game and provides state manipulation method
 **Key Components:**
 
 **GameState Class:**
+
 ```python
 class GameState:
     board: Dict[Tuple[int, int], Optional[str | int]]
@@ -154,12 +169,14 @@ class GameState:
 ```
 
 **Board Representation:**
+
 - Dictionary mapping (row, col) → value
 - **None**: Empty square
 - **'destroyed'**: Square already visited (destroyed)
 - **Integer**: Point value (-10 to +10)
 
 **Difficulty Levels:**
+
 - **Beginner**: Max depth = 2 (looks 2 moves ahead)
 - **Amateur**: Max depth = 4 (looks 4 moves ahead)
 - **Expert**: Max depth = 6 (looks 6 moves ahead)
@@ -167,11 +184,13 @@ class GameState:
 **Critical Methods:**
 
 **`get_valid_moves(knight: str)`**
+
 - Returns list of legal knight moves
 - Filters out destroyed squares
 - Uses L-shaped knight movement pattern
 
 **`make_move(knight: str, position: Tuple[int, int])`**
+
 - Updates knight position
 - Awards/deducts points from square
 - Destroys previous square
@@ -179,11 +198,13 @@ class GameState:
 - Checks for game over conditions
 
 **`copy()`**
+
 - Creates deep copy of game state
 - Essential for minimax simulation
 - Prevents modifying original state during search
 
 **`_check_game_over()`**
+
 - Checks if either player has no valid moves
 - Applies -4 point penalty for no moves
 - Determines winner based on final scores
@@ -193,6 +214,7 @@ class GameState:
 Handles knight movement logic.
 
 **Knight Move Pattern:**
+
 ```python
 KNIGHT_MOVES = [
     (-2, -1), (-2, 1),  # Up 2, Left/Right 1
@@ -203,6 +225,7 @@ KNIGHT_MOVES = [
 ```
 
 **Functions:**
+
 - `get_knight_moves()`: All possible moves (within board)
 - `get_valid_moves()`: Filters out destroyed squares
 - `count_valid_moves()`: Quick count for heuristic
@@ -213,13 +236,14 @@ KNIGHT_MOVES = [
 
 Based on testing with full boards:
 
-| Difficulty | Max Depth | Avg Nodes | Time (ms) | Pruning Efficiency |
-|-----------|-----------|-----------|-----------|-------------------|
-| Beginner  | 2         | 20-50     | < 10      | ~40%              |
-| Amateur   | 4         | 200-500   | 10-50     | ~60%              |
-| Expert    | 6         | 2,000-5,000 | 50-200  | ~70%              |
+| Difficulty | Max Depth | Avg Nodes   | Time (ms) | Pruning Efficiency |
+| ---------- | --------- | ----------- | --------- | ------------------ |
+| Beginner   | 2         | 20-50       | < 10      | ~40%               |
+| Amateur    | 4         | 200-500     | 10-50     | ~60%               |
+| Expert     | 6         | 2,000-5,000 | 50-200    | ~70%               |
 
 ### Search Tree Size (without pruning)
+
 - **Branching factor**: ~8 (knight moves)
 - **Depth 2**: 8² = 64 nodes
 - **Depth 4**: 8⁴ = 4,096 nodes
@@ -228,6 +252,7 @@ Based on testing with full boards:
 **Alpha-Beta pruning typically reduces this by 50-70%**
 
 ### Time Complexity
+
 - **Without Pruning**: O(b^d) where b = branching factor, d = depth
 - **With Alpha-Beta**: O(b^(d/2)) in best case
 - **Space Complexity**: O(d) - depth of recursion
@@ -237,7 +262,9 @@ Based on testing with full boards:
 ### Endpoints Using Minimax
 
 #### `POST /api/game/new`
+
 **Request:**
+
 ```json
 {
   "difficulty": "beginner" | "amateur" | "expert"
@@ -245,6 +272,7 @@ Based on testing with full boards:
 ```
 
 **Response:**
+
 ```json
 {
   "board": {"0,0": null, "0,1": 5, ...},
@@ -263,13 +291,16 @@ Based on testing with full boards:
 ```
 
 **Flow:**
+
 1. Create new GameState with selected difficulty
 2. Call `find_best_move()` for machine's first move
 3. Apply the move to game state
 4. Return updated state to client
 
 #### `POST /api/game/move`
+
 **Request:**
+
 ```json
 {
   "game_state": {...},
@@ -278,6 +309,7 @@ Based on testing with full boards:
 ```
 
 **Response:**
+
 ```json
 {
   "board": {...},
@@ -295,6 +327,7 @@ Based on testing with full boards:
 ```
 
 **Flow:**
+
 1. Reconstruct GameState from JSON
 2. Validate player's move
 3. Apply player's move
@@ -304,7 +337,9 @@ Based on testing with full boards:
 7. Return complete updated state
 
 #### `POST /api/game/machine-move`
+
 **Request:**
+
 ```json
 {
   "game_state": {...}
@@ -312,6 +347,7 @@ Based on testing with full boards:
 ```
 
 **Response:**
+
 ```json
 {
   "move": [5, 3],
@@ -328,17 +364,20 @@ Based on testing with full boards:
 ### Comprehensive Test Suite (`quick_test.py`)
 
 The test file validates:
+
 1. Game state creation for all difficulties
 2. Minimax algorithm execution
 3. Complete game flow simulation
 4. Flask API endpoints
 
 **Run tests:**
+
 ```bash
 python quick_test.py
 ```
 
 **Expected Output:**
+
 - All game difficulties create valid states
 - Minimax finds moves in expected time
 - Full game plays through multiple turns
@@ -347,16 +386,19 @@ python quick_test.py
 ### Manual Testing Checklist
 
 ✅ **Beginner Mode:**
+
 - Machine responds in < 50ms
 - Makes reasonable but not perfect moves
 - Game completes within 20-30 turns
 
 ✅ **Amateur Mode:**
+
 - Machine responds in < 100ms
 - Makes good strategic decisions
 - Prioritizes high-value squares
 
 ✅ **Expert Mode:**
+
 - Machine responds in < 300ms
 - Makes optimal or near-optimal moves
 - Difficult to beat for human players
@@ -366,6 +408,7 @@ python quick_test.py
 ### Production Settings
 
 **Gunicorn Configuration:**
+
 ```bash
 gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 wsgi:app
 ```
@@ -386,6 +429,7 @@ SECRET_KEY=your-production-secret-key
 ### Performance Optimization
 
 **Potential Improvements:**
+
 1. **Iterative Deepening**: Start with shallow search, increase depth if time permits
 2. **Move Ordering**: Search most promising moves first for better pruning
 3. **Transposition Tables**: Cache evaluated positions
@@ -393,6 +437,7 @@ SECRET_KEY=your-production-secret-key
 5. **Opening Book**: Precomputed optimal early moves
 
 **Current Implementation Priorities:**
+
 - Correctness and clarity over maximum performance
 - Reasonable response times across all difficulty levels
 - Scalable architecture for future improvements
@@ -400,18 +445,21 @@ SECRET_KEY=your-production-secret-key
 ## Code Quality
 
 ### Documentation Standards
+
 - All functions have comprehensive docstrings
 - Type hints for function parameters and returns
 - Inline comments for complex logic
 - Module-level docstrings explaining purpose
 
 ### Error Handling
+
 - Validation of input parameters
 - Graceful handling of invalid game states
 - Informative error messages for debugging
 - HTTP status codes match error types
 
 ### Code Organization
+
 ```
 smart_backend/
 ├── algorithms/         # AI logic
@@ -428,18 +476,21 @@ smart_backend/
 ## Future Enhancements
 
 ### Short Term
+
 - [ ] Add move history tracking
 - [ ] Implement undo/redo functionality
 - [ ] Add thinking time display
 - [ ] Show evaluation score to player
 
 ### Medium Term
+
 - [ ] Add move ordering for better pruning
 - [ ] Implement transposition tables
 - [ ] Add difficulty auto-adjustment
 - [ ] Create replay/analysis mode
 
 ### Long Term
+
 - [ ] Machine learning enhancement
 - [ ] Multi-player support
 - [ ] Tournament mode
@@ -458,6 +509,7 @@ The minimax implementation provides a robust, efficient, and well-documented AI 
 ✅ Production-ready deployment configuration
 
 **Measured Results:**
+
 - Expert mode evaluates 2,000-5,000 nodes per move
 - Alpha-beta pruning reduces search by ~60-70%
 - Response times: < 10ms (beginner), < 50ms (amateur), < 200ms (expert)
