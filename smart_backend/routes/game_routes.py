@@ -42,10 +42,26 @@ def new_game():
         game_state = GameState(difficulty=difficulty)
 
         # Machine (white) makes first move
+        # Check if machine has no moves first
+        if game_state.check_and_penalize_no_moves():
+            # Machine had no moves, penalty applied
+            response = game_state.to_dict()
+            response["message"] = "Juego iniciado. Máquina sin movimientos. Se aplicó penalización de -4 puntos. Turno del jugador."
+            response["machine_first_move"] = None
+            response["penalty_applied"] = True
+            return jsonify(response), 200
+        
         result = find_best_move(game_state)
 
         if result.move:
             game_state.make_move("white", result.move)
+            # After machine move, check if player has no moves
+            if game_state.check_and_penalize_no_moves():
+                response = game_state.to_dict()
+                response["message"] = "Juego iniciado. La máquina (blancas) ha movido. Jugador sin movimientos. Se aplicó penalización de -4 puntos. Turno de la máquina."
+                response["machine_first_move"] = list(result.move)
+                response["penalty_applied"] = True
+                return jsonify(response), 200
 
         response = game_state.to_dict()
         response["message"] = "Juego iniciado. La máquina (blancas) ha movido."
@@ -130,21 +146,36 @@ def player_move():
         machine_result = find_best_move(game_state)
 
         if machine_result.move:
+            # La máquina tiene al menos un movimiento: aplicarlo normalmente
             game_state.make_move("white", machine_result.move)
             machine_move = list(machine_result.move)
-        else:
-            machine_move = None
 
-        # Prepare response
+            # Prepare response
+            response = game_state.to_dict()
+            response["machine_move"] = machine_move
+            response["machine_evaluation"] = machine_result.evaluation
+            response["nodes_evaluated"] = machine_result.nodes_evaluated
+
+            if game_state.game_over:
+                response["message"] = f"¡Juego terminado! Ganador: {game_state.winner}"
+            else:
+                response["message"] = "Turno del jugador (negras)"
+
+            return jsonify(response), 200
+
+        # Si la máquina no tiene movimientos, aplicar penalización de -4
+        penalty_applied = game_state.check_and_penalize_no_moves()
+
         response = game_state.to_dict()
-        response["machine_move"] = machine_move
+        response["machine_move"] = None
+        response["penalty_applied"] = bool(penalty_applied)
         response["machine_evaluation"] = machine_result.evaluation
         response["nodes_evaluated"] = machine_result.nodes_evaluated
 
         if game_state.game_over:
             response["message"] = f"¡Juego terminado! Ganador: {game_state.winner}"
         else:
-            response["message"] = "Turno del jugador (negras)"
+            response["message"] = "Máquina sin movimientos. Se aplicó penalización de -4 puntos. Turno del jugador."
 
         return jsonify(response), 200
 
@@ -195,6 +226,47 @@ def get_valid_moves():
             )
 
         valid_moves = game_state.get_valid_moves(knight)
+
+        # Si no hay movimientos y es el turno actual de ese caballo,
+        # aplicamos UNA sola penalización (-4) y dejamos que la máquina
+        # haga como máximo UN movimiento. El siguiente ciclo (si el
+        # jugador sigue sin movimientos) se maneja en una llamada futura,
+        # para que se vea paso a paso.
+        if (
+            not valid_moves
+            and game_state.current_player == knight
+            and not game_state.game_over
+        ):
+            penalty_applied = game_state.check_and_penalize_no_moves()
+
+            machine_move = None
+            if penalty_applied and not game_state.game_over:
+                # Después de la penalización, si ahora es turno de la máquina,
+                # calculamos y aplicamos UN solo movimiento.
+                if game_state.current_player == "white":
+                    machine_result = find_best_move(game_state)
+                    if machine_result.move:
+                        game_state.make_move("white", machine_result.move)
+                        machine_move = list(machine_result.move)
+
+            return (
+                jsonify(
+                    {
+                        "knight": knight,
+                        "position": list(
+                            game_state.white_knight
+                            if knight == "white"
+                            else game_state.black_knight
+                        ),
+                        "valid_moves": [],
+                        "count": 0,
+                        "penalty_applied": bool(penalty_applied),
+                        "game_state": game_state.to_dict(),
+                        "machine_move": machine_move,
+                    }
+                ),
+                200,
+            )
 
         return (
             jsonify(

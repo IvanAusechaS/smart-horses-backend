@@ -173,15 +173,9 @@ class GameState:
         white_moves = self.get_valid_moves("white")
         black_moves = self.get_valid_moves("black")
 
-        # Check if either player has no moves
-        if not white_moves or not black_moves:
+        # Game only ends when BOTH players have no moves
+        if not white_moves and not black_moves:
             self.game_over = True
-
-            # Apply penalty if one has moves and other doesn't
-            if not white_moves and black_moves:
-                self.white_score -= 4
-            elif white_moves and not black_moves:
-                self.black_score -= 4
 
             # Determine winner
             if self.white_score > self.black_score:
@@ -190,6 +184,30 @@ class GameState:
                 self.winner = "black"
             else:
                 self.winner = "tie"
+    
+    def check_and_penalize_no_moves(self):
+        """
+        Check if current player has no moves and apply penalty if so.
+        Returns True if penalty was applied, False otherwise.
+        """
+        current_moves = self.get_valid_moves(self.current_player)
+        
+        if not current_moves:
+            # Apply -4 penalty to current player
+            if self.current_player == "white":
+                self.white_score -= 4
+            else:
+                self.black_score -= 4
+            
+            # Switch turn to opponent
+            self.current_player = "black" if self.current_player == "white" else "white"
+            
+            # Check if game is over after switching
+            self._check_game_over()
+            
+            return True
+        
+        return False
 
     def to_dict(self) -> Dict:
         """Convert game state to dictionary for JSON serialization."""
